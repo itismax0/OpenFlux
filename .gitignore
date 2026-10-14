@@ -33,6 +33,11 @@ Thumbs.db
 .env.local
 yandex-cookies*.txt
 cookies.txt
+cookies-*.json
+channel.key
+secret.txt
+*.conf
+!*.conf.example
 
 .gradle/
 *.hprof

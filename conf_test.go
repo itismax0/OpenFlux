@@ -70,6 +70,32 @@ URL = https://x   ; another comment
 	}
 }
 
+func TestParseConfHashInValue(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "test.conf")
+	body := `[Interface]
+URL = https://disk.yandex.ru/i/XXX#frag
+Password = abc#def;ghi
+Role = client # trailing comment
+`
+	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	conf, err := parseConf(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if conf.Interface["URL"] != "https://disk.yandex.ru/i/XXX#frag" {
+		t.Fatalf("URL = %q", conf.Interface["URL"])
+	}
+	if conf.Interface["Password"] != "abc#def;ghi" {
+		t.Fatalf("Password = %q", conf.Interface["Password"])
+	}
+	if conf.Interface["Role"] != "client" {
+		t.Fatalf("Role = %q", conf.Interface["Role"])
+	}
+}
+
 func TestParseConfBadSection(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "test.conf")

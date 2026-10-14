@@ -61,7 +61,7 @@ func parseConf(path string) (*confFile, error) {
 		}
 		k = strings.TrimSpace(k)
 		v = strings.TrimSpace(v)
-		if i := strings.IndexAny(v, "#;"); i >= 0 {
+		if i := indexInlineComment(v); i >= 0 {
 			v = strings.TrimSpace(v[:i])
 		}
 		if current == nil {
@@ -74,6 +74,21 @@ func parseConf(path string) (*confFile, error) {
 		return nil, err
 	}
 	return out, nil
+}
+
+// indexInlineComment reports where an inline "#"/";" comment starts: at the
+// first marker at the start of the value or after whitespace, so fragments
+// in URLs and "#" in passwords survive. -1 when there is no comment.
+func indexInlineComment(v string) int {
+	for i := 0; i < len(v); i++ {
+		if v[i] != '#' && v[i] != ';' {
+			continue
+		}
+		if i == 0 || v[i-1] == ' ' || v[i-1] == '\t' {
+			return i
+		}
+	}
+	return -1
 }
 
 // confValue returns the value for key in the [Interface] section.
